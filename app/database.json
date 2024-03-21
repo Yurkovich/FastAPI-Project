@@ -1,0 +1,24 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "first_name": "Yury",
+            "last_name": "Antsiferov"
+        },
+        {
+            "id": 2,
+            "first_name": "Антон",
+            "last_name": "Юрков"
+        },
+        {
+            "id": 3,
+            "first_name": "Григорий",
+            "last_name": "Лепс"
+        },
+        {
+            "id": 4,
+            "first_name": "Аркадий",
+            "last_name": "Паровозов"
+        }
+    ]
+}
