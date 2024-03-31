@@ -16,17 +16,13 @@ tasks_router = APIRouter(prefix="/api/v1/tasks")
 def list_task_point(request: Request):
     session = Session(engine)
     stmt = select(TaskModel)
-    """
-    SELECT task.id, task.title, task.description, task.done 
-    FROM task <- ссырой SQL запрос
-    """
     requst_db = session.execute(stmt)
     tasks:list = requst_db.scalars().all()
     session.close()
     if len(tasks) == 0:
         return {"message": "У вас нет задач"}
     else:
-        return {"message": tasks}
+        return tasks
 
 
 @tasks_router.post(path='/create/')
