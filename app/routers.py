@@ -7,11 +7,6 @@ from schemas import TaskCreateSchemas
 
 tasks_router = APIRouter(prefix="/api/v1/tasks")
 
-"""
-    file = open('data.txt')
-    file.write()
-"""
-
 @tasks_router.get(path='/list/')
 def list_task_point(request: Request):
     session = Session(engine)

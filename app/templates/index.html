@@ -4,8 +4,8 @@
 {% block body %}
 <div class="container">
     <div class="header-container">
-        <h1>Получить список задач</h1>
-        <button class="send-button" id="loadTasks">Получить</button>
+        <h1>Список задач</h1>
+        <button class="send-button" id="loadTasks">Показать</button>
     </div>
     <ul id="taskList">
         <!-- список задач будет генерироваться здесь -->
@@ -15,7 +15,6 @@
 <div class="container">
     <div class="header-container">
         <h2>Создать задачу</h2>
-        <button class="send-button" id="createTask">Создать</button>
     </div>
     <div class="input-container">
         <div>
@@ -23,29 +22,27 @@
             <input type="text" id="title">
             <label for="description">Description: </label>
             <input type="text" id="description">
+            <button class="send-button" id="createTask">Создать</button>
         </div>
     </div>
 </div>
 
-
 <div class="container">
     <div class="header-container">
         <h2>Удалить задачу</h2>
-        <button class="send-button" id="deleteTask">Удалить</button>
     </div>
     <div class="input-container">
         <div>
             <label for="title">ID: </label>
             <input type="text" id="task-id">
+            <button class="send-button" id="deleteTask">Удалить</button>
         </div>
     </div>
 </div>
 
-
 <div class="container">
     <div class="header-container">
         <h2>Изменить задачу</h2>
-        <button class="send-button" id="changeTask">Изменить</button>
     </div>
     <div class="input-container">
         <div>
@@ -55,45 +52,24 @@
             <input type="text" id="change-title">
             <label for="change-description">Description: </label>
             <input type="text" id="change-description">
-
+            <button class="send-button" id="changeTask">Изменить</button>
         </div>
     </div>
 </div>
 
-
 <script>
 
-    document.getElementById('changeTask').addEventListener('click', function () {
-        const taskId = document.getElementById('change-task-id').value
-        const title = document.getElementById('change-title').value;
-        const description = document.getElementById('change-description').value;
-
-        fetch(`http://127.0.0.1:8000/api/v1/tasks/update/${taskId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: title,
-                description: description
-            })
-        })
+    document.getElementById('loadTasks').addEventListener('click', function () {
+        fetch('http://127.0.0.1:8000/api/v1/tasks/list/')
             .then(response => response.json())
-            .then(task => {
-                console.log(task);
-            })
-            .catch(error => console.error(error));
-    });
-
-    document.getElementById('deleteTask').addEventListener('click', function () {
-        const taskId = document.getElementById('task-id').value;
-
-        fetch(`http://127.0.0.1:8000/api/v1/tasks/delete/${taskId}`, {
-            method: 'DELETE',
-        })
-            .then(response => response.json())
-            .then(result => {
-                console.log(result);
+            .then(tasks => {
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = '';
+                for (const task of tasks) {
+                    const li = document.createElement('li');
+                    li.textContent = `(${task.id}) ${task.title} : ${task.description}`;
+                    taskList.appendChild(li);
+                }
             })
             .catch(error => console.error(error));
     });
@@ -115,21 +91,60 @@
             .then(response => response.json())
             .then(task => {
                 console.log(task);
+                document.getElementById('title').value = '';
+                document.getElementById('description').value = '';
+                loadTask()
             })
             .catch(error => console.error(error));
     });
 
+    document.getElementById('deleteTask').addEventListener('click', function () {
+        const taskId = document.getElementById('task-id').value;
 
+        fetch(`http://127.0.0.1:8000/api/v1/tasks/delete/${taskId}`, {
+            method: 'DELETE',
+        })
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+                document.getElementById('task-id').value = ''
+                loadTask()
+            })
+            .catch(error => console.error(error));
+    });
 
+    document.getElementById('changeTask').addEventListener('click', function () {
+        const taskId = document.getElementById('change-task-id').value
+        const title = document.getElementById('change-title').value;
+        const description = document.getElementById('change-description').value;
 
+        fetch(`http://127.0.0.1:8000/api/v1/tasks/update/${taskId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: title,
+                description: description
+            })
+        })
+            .then(response => response.json())
+            .then(task => {
+                console.log(task);
+                document.getElementById('change-task-id').value = '';
+                document.getElementById('change-title').value = '';
+                document.getElementById('change-description').value = '';
+                loadTask()
+            })
+            .catch(error => console.error(error));
+    });
 
-
-    document.getElementById('loadTasks').addEventListener('click', function () {
+    function loadTask() {
         fetch('http://127.0.0.1:8000/api/v1/tasks/list/')
             .then(response => response.json())
             .then(tasks => {
                 const taskList = document.getElementById('taskList');
-                taskList.innerHTML = ''; // clear previous tasks
+                taskList.innerHTML = '';
                 for (const task of tasks) {
                     const li = document.createElement('li');
                     li.textContent = `(${task.id}) ${task.title} : ${task.description}`;
@@ -137,8 +152,7 @@
                 }
             })
             .catch(error => console.error(error));
-    });
-
+    }
 
 </script>
 
@@ -146,3 +160,18 @@
 
 
 {% endblock %}
+
+<!-- document.getElementById('loadTasks').addEventListener('click', function () {
+    fetch('http://127.0.0.1:8000/api/v1/tasks/list/')
+        .then(response => response.json())
+        .then(tasks => {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = ''; // clear previous tasks
+            for (const task of tasks) {
+                const li = document.createElement('li');
+                li.textContent = `(${task.id}) ${task.title} : ${task.description}`;
+                taskList.appendChild(li);
+            }
+        })
+        .catch(error => console.error(error));
+}); -->
