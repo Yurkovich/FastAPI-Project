@@ -5,7 +5,7 @@
 <div class="container">
     <div class="header-container">
         <h1>Список задач</h1>
-        <button class="send-button" id="loadTasks">Показать</button>
+        <button class="send-button" onclick="loadTask()" id="loadTasks">Показать</button>
     </div>
     <ul id="taskList">
         <!-- список задач будет генерироваться здесь -->
@@ -59,7 +59,7 @@
 
 <script>
 
-    document.getElementById('loadTasks').addEventListener('click', function () {
+    function loadTask() {
         fetch('http://127.0.0.1:8000/api/v1/tasks/list/')
             .then(response => response.json())
             .then(tasks => {
@@ -67,12 +67,37 @@
                 taskList.innerHTML = '';
                 for (const task of tasks) {
                     const li = document.createElement('li');
+                    const deleteButton = document.createElement('button');
+                    const updateButton = document.createElement('button');
+                    
                     li.textContent = `(${task.id}) ${task.title} : ${task.description}`;
+                    deleteButton.textContent = 'Удалить';
+                    deleteButton.setAttribute('data-id', task.id);
+                    
+                    deleteButton.addEventListener('click', function () {
+                        const taskId = this.getAttribute('data-id');
+
+                        fetch(`http://127.0.0.1:8000/api/v1/tasks/delete/${taskId}`, {
+                            method: 'DELETE',
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            console.log(result);
+                            loadTask();
+                        })
+                        .catch(error => console.error(error));
+                    });
+
+                    updateButton.textContent = 'Редактировать';
+
+                    li.appendChild(deleteButton);
+                    li.appendChild(updateButton);
+
                     taskList.appendChild(li);
                 }
             })
             .catch(error => console.error(error));
-    });
+            }
 
     document.getElementById('createTask').addEventListener('click', function () {
         const title = document.getElementById('title').value;
@@ -139,20 +164,6 @@
             .catch(error => console.error(error));
     });
 
-    function loadTask() {
-        fetch('http://127.0.0.1:8000/api/v1/tasks/list/')
-            .then(response => response.json())
-            .then(tasks => {
-                const taskList = document.getElementById('taskList');
-                taskList.innerHTML = '';
-                for (const task of tasks) {
-                    const li = document.createElement('li');
-                    li.textContent = `(${task.id}) ${task.title} : ${task.description}`;
-                    taskList.appendChild(li);
-                }
-            })
-            .catch(error => console.error(error));
-    }
 
 </script>
 
