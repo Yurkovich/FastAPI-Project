@@ -65,3 +65,7 @@ body {
     padding: 10px;
     border-bottom: 1px solid #ccc;
 }
+
+#taskList button {
+    margin-left: 1%;
+}

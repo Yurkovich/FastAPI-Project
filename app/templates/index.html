@@ -3,172 +3,211 @@
 <!-- Начала блока -->
 {% block body %}
 <div class="container">
-    <div class="header-container">
-        <h1>Список задач</h1>
-        <button class="send-button" onclick="loadTask()" id="loadTasks">Показать</button>
-    </div>
-    <ul id="taskList">
-        <!-- список задач будет генерироваться здесь -->
-    </ul>
+  <div class="header-container">
+    <h1>Список задач</h1>
+    <button class="send-button" onclick="loadTask()" id="loadTasks">
+      Показать
+    </button>
+  </div>
+  <ul id="taskList">
+    <!-- список задач будет генерироваться здесь -->
+  </ul>
 </div>
 
 <div class="container">
-    <div class="header-container">
-        <h2>Создать задачу</h2>
+  <div class="header-container">
+    <h2>Создать задачу</h2>
+  </div>
+  <div class="input-container">
+    <div>
+      <label for="title">Title: </label>
+      <input type="text" id="title" />
+      <label for="description">Description: </label>
+      <input type="text" id="description" />
+      <button class="send-button" id="createTask">Создать</button>
     </div>
-    <div class="input-container">
-        <div>
-            <label for="title">Title: </label>
-            <input type="text" id="title">
-            <label for="description">Description: </label>
-            <input type="text" id="description">
-            <button class="send-button" id="createTask">Создать</button>
-        </div>
-    </div>
+  </div>
 </div>
 
 <div class="container">
-    <div class="header-container">
-        <h2>Удалить задачу</h2>
+  <div class="header-container">
+    <h2>Удалить задачу</h2>
+  </div>
+  <div class="input-container">
+    <div>
+      <label for="title">ID: </label>
+      <input type="text" id="task-id" />
+      <button class="send-button" id="deleteTask">Удалить</button>
     </div>
-    <div class="input-container">
-        <div>
-            <label for="title">ID: </label>
-            <input type="text" id="task-id">
-            <button class="send-button" id="deleteTask">Удалить</button>
-        </div>
-    </div>
+  </div>
 </div>
 
 <div class="container">
-    <div class="header-container">
-        <h2>Изменить задачу</h2>
+  <div class="header-container">
+    <h2>Изменить задачу</h2>
+  </div>
+  <div class="input-container">
+    <div>
+      <label for="change-task-id">ID: </label>
+      <input type="text" id="change-task-id" />
+      <label for="change-title">Title: </label>
+      <input type="text" id="change-title" />
+      <label for="change-description">Description: </label>
+      <input type="text" id="change-description" />
+      <button class="send-button" id="changeTask">Изменить</button>
     </div>
-    <div class="input-container">
-        <div>
-            <label for="change-task-id">ID: </label>
-            <input type="text" id="change-task-id">
-            <label for="change-title">Title: </label>
-            <input type="text" id="change-title">
-            <label for="change-description">Description: </label>
-            <input type="text" id="change-description">
-            <button class="send-button" id="changeTask">Изменить</button>
-        </div>
-    </div>
+  </div>
 </div>
 
 <script>
+  function loadTask() {
+    fetch("http://127.0.0.1:8000/api/v1/tasks/list/")
+      .then((response) => response.json())
+      .then((tasks) => {
+        const taskList = document.getElementById("taskList");
+        taskList.innerHTML = "";
+        for (const task of tasks) {
+          const li = document.createElement("li");
+          const deleteButton = document.createElement("button");
+          const updateButton = document.createElement("button");
 
-    function loadTask() {
-        fetch('http://127.0.0.1:8000/api/v1/tasks/list/')
-            .then(response => response.json())
-            .then(tasks => {
-                const taskList = document.getElementById('taskList');
-                taskList.innerHTML = '';
-                for (const task of tasks) {
-                    const li = document.createElement('li');
-                    const deleteButton = document.createElement('button');
-                    const updateButton = document.createElement('button');
-                    
-                    li.textContent = `(${task.id}) ${task.title} : ${task.description}`;
-                    deleteButton.textContent = 'Удалить';
-                    deleteButton.setAttribute('data-id', task.id);
-                    
-                    deleteButton.addEventListener('click', function () {
-                        const taskId = this.getAttribute('data-id');
+          li.textContent = `(${task.id}) ${task.title} : ${task.description}`;
+          deleteButton.textContent = "Удалить";
+          deleteButton.setAttribute("data-id", task.id);
 
-                        fetch(`http://127.0.0.1:8000/api/v1/tasks/delete/${taskId}`, {
-                            method: 'DELETE',
-                        })
-                        .then(response => response.json())
-                        .then(result => {
-                            console.log(result);
-                            loadTask();
-                        })
-                        .catch(error => console.error(error));
-                    });
+          deleteButton.addEventListener("click", function () {
+            const taskId = this.getAttribute("data-id");
 
-                    updateButton.textContent = 'Редактировать';
-
-                    li.appendChild(deleteButton);
-                    li.appendChild(updateButton);
-
-                    taskList.appendChild(li);
-                }
+            fetch(`http://127.0.0.1:8000/api/v1/tasks/delete/${taskId}`, {
+              method: "DELETE",
             })
-            .catch(error => console.error(error));
-            }
-
-    document.getElementById('createTask').addEventListener('click', function () {
-        const title = document.getElementById('title').value;
-        const description = document.getElementById('description').value;
-
-        fetch('http://127.0.0.1:8000/api/v1/tasks/create/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: title,
-                description: description
-            })
-        })
-            .then(response => response.json())
-            .then(task => {
-                console.log(task);
-                document.getElementById('title').value = '';
-                document.getElementById('description').value = '';
-                loadTask()
-            })
-            .catch(error => console.error(error));
-    });
-
-    document.getElementById('deleteTask').addEventListener('click', function () {
-        const taskId = document.getElementById('task-id').value;
-
-        fetch(`http://127.0.0.1:8000/api/v1/tasks/delete/${taskId}`, {
-            method: 'DELETE',
-        })
-            .then(response => response.json())
-            .then(result => {
+              .then((response) => response.json())
+              .then((result) => {
                 console.log(result);
-                document.getElementById('task-id').value = ''
-                loadTask()
-            })
-            .catch(error => console.error(error));
-    });
+                loadTask();
+              })
+              .catch((error) => console.error(error));
+          });
 
-    document.getElementById('changeTask').addEventListener('click', function () {
-        const taskId = document.getElementById('change-task-id').value
-        const title = document.getElementById('change-title').value;
-        const description = document.getElementById('change-description').value;
+          updateButton.textContent = "Редактировать";
 
-        fetch(`http://127.0.0.1:8000/api/v1/tasks/update/${taskId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: title,
-                description: description
-            })
-        })
-            .then(response => response.json())
-            .then(task => {
-                console.log(task);
-                document.getElementById('change-task-id').value = '';
-                document.getElementById('change-title').value = '';
-                document.getElementById('change-description').value = '';
-                loadTask()
-            })
-            .catch(error => console.error(error));
-    });
+          updateButton.setAttribute("data-id", task.id);
+          updateButton.setAttribute("data-title", task.title);
+          updateButton.setAttribute("data-description", task.description);
 
+          updateButton.addEventListener("click", function () {
+            const taskId = this.previousSibling.getAttribute("data-id");
+            const form = document.createElement("form");
+            const taskTitle = this.getAttribute("data-title");
+            const taskDescription = this.getAttribute("data-description");
+            form.innerHTML = `
+                            <label for="title">Title: </label><br>
+                            <input type="text" id="title" name="title" value="${taskTitle}"><br>
+                            <label for="description">Description: </label><br>
+                            <input type="text" id="description" name="description" value="${taskDescription}"><br>
+                            <input type="submit" value="Отправить">
+                        `;
 
+            this.parentNode.replaceChild(form, this);
+
+            form.addEventListener("submit", function (event) {
+              event.preventDefault();
+
+              const updatedTask = {
+                title: this.title.value,
+                description: this.description.value,
+              };
+
+              fetch(`http://127.0.0.1:8000/api/v1/tasks/update/${taskId}`, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedTask),
+              })
+                .then((response) => response.json())
+                .then((result) => {
+                  console.log(result);
+                  loadTask();
+                })
+                .catch((error) => console.error(error));
+            });
+          });
+
+          li.appendChild(deleteButton);
+          li.appendChild(updateButton);
+
+          taskList.appendChild(li);
+        }
+      })
+      .catch((error) => console.error(error));
+  }
+
+  document.getElementById("createTask").addEventListener("click", function () {
+    const title = document.getElementById("title").value;
+    const description = document.getElementById("description").value;
+
+    fetch("http://127.0.0.1:8000/api/v1/tasks/create/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title,
+        description: description,
+      }),
+    })
+      .then((response) => response.json())
+      .then((task) => {
+        console.log(task);
+        document.getElementById("title").value = "";
+        document.getElementById("description").value = "";
+        loadTask();
+      })
+      .catch((error) => console.error(error));
+  });
+
+  document.getElementById("deleteTask").addEventListener("click", function () {
+    const taskId = document.getElementById("task-id").value;
+
+    fetch(`http://127.0.0.1:8000/api/v1/tasks/delete/${taskId}`, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log(result);
+        document.getElementById("task-id").value = "";
+        loadTask();
+      })
+      .catch((error) => console.error(error));
+  });
+
+  document.getElementById("changeTask").addEventListener("click", function () {
+    const taskId = document.getElementById("change-task-id").value;
+    const title = document.getElementById("change-title").value;
+    const description = document.getElementById("change-description").value;
+
+    fetch(`http://127.0.0.1:8000/api/v1/tasks/update/${taskId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title,
+        description: description,
+      }),
+    })
+      .then((response) => response.json())
+      .then((task) => {
+        console.log(task);
+        document.getElementById("change-task-id").value = "";
+        document.getElementById("change-title").value = "";
+        document.getElementById("change-description").value = "";
+        loadTask();
+      })
+      .catch((error) => console.error(error));
+  });
 </script>
-
-
-
 
 {% endblock %}
 
